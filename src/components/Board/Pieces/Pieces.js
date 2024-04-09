@@ -1,44 +1,68 @@
 import './Pieces.css'
 import Piece from './Piece'
+import { useState, useRef } from 'react'
+import { createPosition, copyPosition } from '../../../helper'
+
 
 const Pieces = () => {
-    const position = new Array(8).fill('').map(x=> new Array(8).fill(''))
-    
-    for(let i = 0; i < 8; i++){
-        position [1][i] = 'wp'
-        position [6][i] = 'bp'
+
+    const ref = useRef()
+
+    const [state, setState] = useState(createPosition())
+
+    const calculateCoords = e => {
+        const {width, left, top} = ref.current.getBoundingClientRect()
+        const size = width / 8
+        const y = Math.floor((e.clientX - left)/size)
+        const x = 7 - Math.floor((e.clientY - top)/size)
+        return {x,y}
     }
+
+    const onDrop = e => {
+        const newPosition = copyPosition (state)
+
+        console.log ("NEW POSITION:")
+        console.log (newPosition)
+
+        const {x,y} = calculateCoords(e)
+
+        console.log ("DATA TRANSFER:")
+        console.log (e.dataTransfer)
+        const [p, rank, file] = e.dataTransfer.getData('text').split(',')
+
+        console.log (p)
+        console.log (rank)
+        console.log (file)
+
+        console.log (x)
+        console.log(y)
+
+        newPosition[rank][file] = ''    
+        newPosition[x][y] = p
+        
+        setState(newPosition)
+
+    }
+
+    const onDragOver = e => e.preventDefault()
     
-    position[0][0] = 'wr'
-    position[0][1] = 'wn'
-    position[0][2] = 'wb'
-    position[0][3] = 'wq'
-    position[0][4] = 'wk'
-    position[0][5] = 'wb'
-    position[0][6] = 'wn'
-    position[0][7] = 'wr'
-    position[7][0] = 'br'
-    position[7][1] = 'bn'
-    position[7][2] = 'bb'
-    position[7][3] = 'bq'
-    position[7][4] = 'bk'
-    position[7][5] = 'bb'
-    position[7][6] = 'bn'
-    position[7][7] = 'br'
+    
 
-
-
-
-    console.log(position)
-
-    return <div className = 'pieces'>
-        { position.map((r,rank) =>
-            r.map((f,file) => position[rank][file] 
+    return <div 
+        ref = {ref}
+        onDrop = {onDrop}
+        onDragOver = {onDragOver}
+        className = 'pieces'
+    
+    >
+        
+        { state.map((r,rank) =>
+            r.map((f,file) => state[rank][file] 
             ? <Piece
                 key = {rank+'-'+file}
                 rank={rank}
                 file={file}
-                piece={position[rank][file]}
+                piece={state[rank][file]}
               />
             : null
         )
