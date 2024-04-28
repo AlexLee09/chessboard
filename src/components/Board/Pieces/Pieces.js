@@ -2,13 +2,17 @@ import './Pieces.css'
 import Piece from './Piece'
 import { useState, useRef } from 'react'
 import { createPosition, copyPosition } from '../../../helper'
+import { useAppContext } from '../../../contexts/Context'
+import { makeNewMove } from '../../../reducer/actions/move'
 
 
 const Pieces = () => {
 
     const ref = useRef()
 
-    const [state, setState] = useState(createPosition())
+    const {appState,dispatch} = useAppContext()
+
+    const currentPosition = appState.position[appState.position.length-1 ]
 
     const calculateCoords = e => {
         const {width, left, top} = ref.current.getBoundingClientRect()
@@ -19,7 +23,7 @@ const Pieces = () => {
     }
 
     const onDrop = e => {
-        const newPosition = copyPosition (state)
+        const newPosition = copyPosition (currentPosition)
 
         console.log ("NEW POSITION:")
         console.log (newPosition)
@@ -40,7 +44,7 @@ const Pieces = () => {
         newPosition[rank][file] = ''    
         newPosition[x][y] = p
         
-        setState(newPosition)
+        dispatch(makeNewMove({newPosition}))
 
     }
 
@@ -56,13 +60,13 @@ const Pieces = () => {
     
     >
         
-        { state.map((r,rank) =>
-            r.map((f,file) => state[rank][file] 
+        { currentPosition.map((r,rank) =>
+            r.map((f,file) => currentPosition[rank][file] 
             ? <Piece
                 key = {rank+'-'+file}
                 rank={rank}
                 file={file}
-                piece={state[rank][file]}
+                piece={currentPosition[rank][file]}
               />
             : null
         )
